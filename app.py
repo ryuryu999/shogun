@@ -1,65 +1,43 @@
-import os
-import sys
 from flask import Flask, request, abort
 
 from linebot import (
-    LineBotApi, WebhookHandler
+ LineBotApi, WebhookHandler
 )
 from linebot.exceptions import (
-    InvalidSignatureError
+ InvalidSignatureError
 )
 from linebot.models import (
-    MessageEvent, TextMessage, TextSendMessage,
+ MessageEvent, TextMessage, TextSendMessage,
 )
 
 app = Flask(__name__)
 
-
-channel_secret = os.environ['LINE_CHANNEL_SECRET']
-channel_access_token = os.environ['LINE_CHANNEL_ACCESS_TOKEN']
-
-if channel_secret is None:
-    print('Specify LINE_CHANNEL_SECRET as environment variable.')
-    sys.exit(1)
-if channel_access_token is None:
-    print('Specify LINE_CHANNEL_ACCESS_TOKEN as environment variable.')
-    sys.exit(1)
-
-line_bot_api = LineBotApi(channel_access_token)
-handler = WebhookHandler(channel_secret)
-
-@app.route("/")
-def hello_world():
-    return "hello world!"
+# 自分のLINE botのデータを設定する。
+line_bot_api = LineBotApi('H2BhCCb4wm8dyyosTi3bp6fDfBasBR6RFKA6O3X8Qs79wL/xyft/9MsBSQF0koROOnJk0iB0HPLJ+KPV/u/srhMhHzR9czxmmC/cnwAKLqEzIbakxZw1rEfvXDn3PhteF/hzMhm13U17rJBVTKiTZQdB04t89/1O/w1cDnyilFU=')
+handler = WebhookHandler('4a3b7434e9f34fae934518c3d4f7aa9e')
 
 @app.route("/callback", methods=['POST'])
 def callback():
-    # get X-Line-Signature header value
-    signature = request.headers['X-Line-Signature']
+ # get X-Line-Signature header value
+ signature = request.headers['X-Line-Signature']
 
-    # get request body as text
-    body = request.get_data(as_text=True)
-    app.logger.info("Request body: " + body)
+# get request body as text
+ body = request.get_data(as_text=True)
+ app.logger.info("Request body: " + body)
 
-    # handle webhook body
-    try:
-        handler.handle(body, signature)
-    except InvalidSignatureError:
-        abort(400)
+# handle webhook body
+ try:
+  handler.handle(body, signature)
+ except InvalidSignatureError:
+  abort(400)
 
-    return 'OK'
-
+ return 'OK'
 
 @handler.add(MessageEvent, message=TextMessage)
 def handle_message(event):
-    line_bot_api.reply_message(
-        event.reply_token,
-        TextSendMessage(text=event.message.text))
-
-
+ line_bot_api.reply_message(
+  event.reply_token,
+  TextSendMessage(text=event.message.text))
 
 if __name__ == "__main__":
-#    app.run()
-# *** 以下の内容に変更 ***
-port = int(os.getenv('PORT', 5000))
-app.run(debug=True, host='0.0.0.0', port=port)
+ app.run()
